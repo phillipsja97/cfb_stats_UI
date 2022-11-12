@@ -22,4 +22,15 @@ router.get('/:id', async (req, resolve, next) => {
     }
 });
 
+router.get('/scoring', async (req, resolve, next) => {
+    try {
+        let results = await db.all()
+        resolve.json(results);
+    } catch(e) {
+        console.log(e);
+        res.sendStatus(500);
+    }
+});
+
+
 module.exports = router;

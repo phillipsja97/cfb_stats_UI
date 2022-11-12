@@ -11,9 +11,31 @@ const pool = mysql.createPool({
 });
 
 let statsDB = {};
+
 statsDB.all = () => {
     return new Promise((res, rej) => {
-        pool.query('select * from totaloffense', (err, results) => {
+        pool.query('select third.ranking as 3rdDownRank, \
+        third.percentage as 3rdDownPercent, \
+        fourth.ranking as 4thDownRank, \
+        fourth.percentage as 4thDownPercent, \
+        comp.ranking as CompletionRank, \
+        comp.percentage as CompletionPercentage, \
+        scoring.ranking as ScoringOffRanking, \
+        scoring.pts as ScoringOffPoints, \
+        scoring.ppg as ScoringOffPPG, \
+        total.ranking as TotalOffRank, \
+        total.ypp as TotalOffYPP, \
+        total.ypg as TotalOffYPG \
+    from 3rddownconversionpct third \
+    join 4thdownconversionpct fourth \
+        on third.team = fourth.team \
+    join completionpercentage comp \
+        on fourth.team = comp.team \
+    join scoringOffense scoring \
+        on comp.team = scoring.team \
+    join totalOffense total \
+        on scoring.team = total.team \
+        where third.team = "Tennessee"', (err, results) => {
             if (err)  {
                 return rej(err);
             }
@@ -32,5 +54,40 @@ statsDB.one = (team) => {
         })
     })
 }
+
+const getAllOffense = () => {
+    statsDB.all = () => {
+        return new Promise((res, rej) => {
+            pool.query('select third.ranking as 3rdDownRank, \
+            third.percentage as 3rdDownPercent, \
+            fourth.ranking as 4thDownRank, \
+            fourth.percentage as 4thDownPercent, \
+            comp.ranking as CompletionRank, \
+            comp.percentage as CompletionPercentage, \
+            scoring.ranking as ScoringOffRanking, \
+            scoring.pts as ScoringOffPoints, \
+            scoring.ppg as ScoringOffPPG, \
+            total.ranking as TotalOffRank, \
+            total.ypp as TotalOffYPP, \
+            total.ypg as TotalOffYPG \
+        from 3rddownconversionpct third \
+        join 4thdownconversionpct fourth \
+            on third.team = fourth.team \
+        join completionpercentage comp \
+            on fourth.team = comp.team \
+        join scoringOffense scoring \
+            on comp.team = scoring.team \
+        join totalOffense total \
+            on scoring.team = total.team \
+            where third.team = "Tennessee"', [team], (err, results) => {
+                if (err)  {
+                    return rej(err);
+                }
+                return res(results[0]);
+            })
+        })
+    }
+}
+
 
 module.exports = statsDB;
